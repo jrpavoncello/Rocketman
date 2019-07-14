@@ -5,16 +5,16 @@ using UnityEngine;
 public class RocketController : MonoBehaviour
 {
     [SerializeField]
-    float LiftMultiplier = 3400f;
+    float liftMultiplier = 3400f;
 
     [SerializeField]
-    float RotationMultiplier = 1;
+    float rotationMultiplier = 1;
 
     [SerializeField]
-    float GravityAcceleration = -150f;
+    float gravityAcceleration = -150f;
 
     [SerializeField]
-    float VolumeFadeSpeed = .05f;
+    float volumeFadeSpeed = .03f;
 
     [SerializeField]
     AudioSource primaryAudioSource;
@@ -25,6 +25,9 @@ public class RocketController : MonoBehaviour
     private AudioSource[] supportSources = new AudioSource[10];
     private int supportIndex = 0;
     private float rocketVolume;
+    private HashSet<GameObject> collidingGameObjects = new HashSet<GameObject>();
+
+    public bool IsInCollision => this.collidingGameObjects.Count > 0;
 
     // Start is called before the first frame update
     void Start()
@@ -48,11 +51,11 @@ public class RocketController : MonoBehaviour
         var verticalInput = Input.GetAxis("Vertical");
         var horizontalInput = Input.GetAxis("Horizontal");
 
-        var currentVolumeSource = this.supportSources[supportIndex];
+        var currentVolumeSource = this.supportSources[this.supportIndex];
 
         if (verticalInput > 0f)
         {
-            rigidBody.AddRelativeForce(new Vector3(0, LiftMultiplier * verticalInput * Time.deltaTime, 0));
+            rigidBody.AddRelativeForce(new Vector3(0, liftMultiplier * verticalInput * Time.deltaTime, 0));
 
             if(!currentVolumeSource.isPlaying)
             {
@@ -63,34 +66,63 @@ public class RocketController : MonoBehaviour
         {
             if(currentVolumeSource.isPlaying)
             {
-                StartCoroutine(FadeVolume(currentVolumeSource, 0f, true));
                 this.supportIndex = (this.supportIndex + 1) % this.supportSources.Length;
+
+                StartCoroutine(FadeVolume(currentVolumeSource, 0f, true));
             }
         }
 
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            transform.position = startingPosition;
-            transform.rotation = startingRotation;
-
-            // Stop the rigid from moving or rotation once we reset the position to the launch pad
-            rigidBody.velocity = Vector3.zero;
-            rigidBody.angularVelocity = Vector3.zero;
+            ResetRocket();
         }
         else
         {
-            rigidBody.AddForce(Vector3.up * rigidBody.mass * GravityAcceleration * Time.deltaTime);
+            rigidBody.AddForce(Vector3.up * rigidBody.mass * gravityAcceleration * Time.deltaTime);
 
             if (horizontalInput != 0f)
             {
                 rigidBody.freezeRotation = true;
 
-                this.transform.Rotate(new Vector3(0, 0, RotationMultiplier * horizontalInput * Time.deltaTime));
+                this.transform.Rotate(new Vector3(0, 0, rotationMultiplier * horizontalInput * Time.deltaTime));
 
                 rigidBody.freezeRotation = false;
             }
         }
+    }
+
+    private void ResetRocket()
+    {
+        transform.position = startingPosition;
+        transform.rotation = startingRotation;
+
+        // Stop the rigid from moving or rotation once we reset the position to the launch pad
+        rigidBody.velocity = Vector3.zero;
+        rigidBody.angularVelocity = Vector3.zero;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch(collision.gameObject.tag)
+        {
+            case ProjectTags.FRIENDLY:
+                break;
+            case ProjectTags.FINISH:
+                break;
+            case ProjectTags.FUEL:
+                break;
+            default:
+                ResetRocket();
+                break;
+        }
+
+        this.collidingGameObjects.Add(collision.gameObject);
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        this.collidingGameObjects.Remove(collision.gameObject);
     }
 
     IEnumerator FadeVolume(AudioSource source, float targetVol, bool stopOnFinish)
@@ -103,17 +135,18 @@ public class RocketController : MonoBehaviour
         float t = 0;
         float startVol = source.volume;
 
-        while(source.volume > targetVol + .001f || 
-            source.volume < targetVol - .001f)
+        while(t < 1f &&
+            (source.volume > targetVol + .001f || 
+            source.volume < targetVol - .001f))
         {
             source.volume = Mathf.Lerp(startVol, targetVol, t);
 
-            t += this.VolumeFadeSpeed;
+            t += this.volumeFadeSpeed;
 
             yield return false;
         }
 
-        if(stopOnFinish)
+        if (stopOnFinish)
         {
             source.Stop();
         }
