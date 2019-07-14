@@ -97,7 +97,7 @@ public class RocketController : MonoBehaviour
         transform.position = startingPosition;
         transform.rotation = startingRotation;
 
-        // Stop the rigid from moving or rotation once we reset the position to the launch pad
+        // Stop the rigid from moving or rotating once we reset the position to the launch pad
         rigidBody.velocity = Vector3.zero;
         rigidBody.angularVelocity = Vector3.zero;
     }
