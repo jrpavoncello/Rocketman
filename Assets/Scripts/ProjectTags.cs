@@ -5,5 +5,5 @@ public static class ProjectTags
 {
     public const string FRIENDLY = "Friendly";
     public const string FINISH = "Finish";
-    public const string FUEL = "Fuel";
+    public const string LANDINGGEAR = "LandingGear";
 }
