@@ -1528,6 +1528,10 @@ PrefabInstance:
       propertyPath: levelChanger
       value: 
       objectReference: {fileID: 278798145827095525}
+    - target: {fileID: 1423750566, guid: 747c6abd77f7a954ca8be0a8b55730f4, type: 3}
+      propertyPath: finishDelay
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7542352646568475099, guid: 747c6abd77f7a954ca8be0a8b55730f4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3271,6 +3275,11 @@ PrefabInstance:
     - target: {fileID: 2778237219062719973, guid: e26c93f3264470c48b365a9dd972c431,
         type: 3}
       propertyPath: nextLevel
+      value: Level01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2778237219062719973, guid: e26c93f3264470c48b365a9dd972c431,
+        type: 3}
+      propertyPath: nextLevelName
       value: Level01
       objectReference: {fileID: 0}
     - target: {fileID: 31765851, guid: e26c93f3264470c48b365a9dd972c431, type: 3}

@@ -7,36 +7,61 @@ using UnityEngine.SceneManagement;
 public class RocketController : MonoBehaviour
 {
     [SerializeField]
+    [Tooltip("Will be multiplied to the value from the vertical input axes to apply a lift to the rocket in the direction it's facing.")]
     private float liftMultiplier = 3400f;
 
     [SerializeField]
-    private float rotationMultiplier = 1;
+    [Tooltip("Will be multiplied to the value from the horizontal input axes to apply a rotation to the rocket.")]
+    private float rotationMultiplier = 75f;
 
     [SerializeField]
+    [Tooltip("Acceleration in m/s^2 that will be used in a gravity calculation to apply a gravity force to the rocket.")]
     private float gravityAcceleration = -150f;
 
     [SerializeField]
-    private float volumeFadeSpeed = .03f;
+    [Tooltip("Lerp rate in milliseconds that the volume of the thrust will be faded in and out (higher rate, faster fade).")]
+    [Range(0f, 1f)]
+    private float thrustVolumeLerp = .03f;
 
     [SerializeField]
+    [Tooltip("Audio played when the player is applying thrust. This will be copied into an array of AudioSource " +
+        "copies to gracefully handle fading in/out.")]
     private AudioSource thrustAudioSource;
 
     [SerializeField]
+    [Tooltip("Audio played when the player collides with an obstacle or lands inappropriately on the landing pad.")]
     private AudioSource deathAudioSource;
 
     [SerializeField]
+    [Tooltip("Audio played when the player begins a landing on the landing pad.")]
     private AudioSource finishAudioSource;
 
     [SerializeField]
+    [Tooltip("Responsible for fading in/out and changing levels.")]
     private LevelChanger levelChanger;
 
     [SerializeField]
+    [Tooltip("Delay in seconds before the landing is considered successful and the camera will begin to fade to black. " +
+        "If the rocket falls over or touches an obstacle before this, it will be considered a death.")]
+    [Range(0, 30)]
     private int finishDelay = 2;
 
     [SerializeField]
+    [Tooltip("Delay in seconds before the camera will begin to fade to black.")]
+    [Range(0, 30)]
     private int deathDelay = 2;
+    
+    [SerializeField]
+    [Tooltip("The force of the explosion that will be applied where the rocket collided with an obstacle. " +
+        "This will be multiplied by the magnitude of the rocket's velocity (faster moving, larger explosion).")]
+    private float deathExplosionBaseForce = 3000f;
 
-    private RocketState state = RocketState.Alive;
+    [SerializeField]
+    [Tooltip("When the velocity is factored in, it will be minimally clamped to this value so that we don't cause NaN.")]
+    private float minVelocityMultiplier = 0.2f;
+
+    public RocketState State { get; private set; } = RocketState.Alive;
+
     private RigidbodyConstraints startingConstraints;
 
     public bool IsInCollision => numCollisions > 0;
@@ -76,7 +101,7 @@ public class RocketController : MonoBehaviour
     {
         ApplyGravity();
 
-        if (this.state != RocketState.Alive)
+        if (this.State != RocketState.Alive)
         {
             return;
         }
@@ -178,7 +203,7 @@ public class RocketController : MonoBehaviour
                 break;
 
             default:
-                KillTheRocket();
+                KillTheRocket(collision.GetContact(0).point);
                 break;
         }
 
@@ -200,50 +225,66 @@ public class RocketController : MonoBehaviour
 
     private void HandleLevelComplete()
     {
-        if (this.state == RocketState.Alive)
+        if (this.State == RocketState.Alive)
         {
-            this.state = RocketState.WaitingToFinish;
+            this.State = RocketState.WaitingToFinish;
 
             StopThrustSounds();
 
             this.finishAudioSource.Play();
 
-            BehaviourHelpers.DelayInvoke(this, () =>
-            {
-                if(this.state == RocketState.WaitingToFinish)
-                {
-                    // In case the rocket hits the finish after dying
-                    levelChanger.BeginNextLevel();
-                }
-            },
-            this.finishDelay);
+            Invoke(nameof(CheckRocketPostDelay), this.finishDelay);
+        }
+    }
+
+    private void CheckRocketPostDelay()
+    {
+        if (this.State == RocketState.WaitingToFinish)
+        {
+            // In case the rocket hits the finish after dying
+            levelChanger.BeginNextLevel();
         }
     }
 
     private void KillTheRocket()
     {
-        if (this.state == RocketState.Dead)
+        KillTheRocket(Vector3.negativeInfinity);
+    }
+
+    private void KillTheRocket(Vector3 explosionPosition)
+    {
+        if (this.State == RocketState.Dead)
         {
             // Already dead, waiting for the animation to complete
             return;
         }
 
-        this.state = RocketState.Dead;
+        this.State = RocketState.Dead;
 
         rigidBody.constraints = RigidbodyConstraints.None;
+
+        if(!explosionPosition.IsInfinityOrNaN())
+        {
+            // Protect against really low rocket velocity when collision occurs
+            var velocityMultiplier = Mathf.Max(rigidBody.velocity.magnitude, minVelocityMultiplier);
+            var explosionForce = this.deathExplosionBaseForce * velocityMultiplier;
+
+            rigidBody.AddExplosionForce(explosionForce, explosionPosition, 0f, 0f, ForceMode.Force);
+        }
 
         StopThrustSounds();
 
         this.deathAudioSource.Play();
 
-        BehaviourHelpers.DelayInvoke(this, () =>
+        Invoke(nameof(ReloadLevelPostDelay), this.deathDelay);
+    }
+
+    private void ReloadLevelPostDelay()
+    {
+        levelChanger.ReloadLevel(() =>
         {
-            levelChanger.ReloadLevel(() =>
-            {
-                ResetRocketToStart();
-            });
-        },
-        this.deathDelay);
+            ResetRocketToStart();
+        });
     }
 
     private void StopThrustSounds()
@@ -280,7 +321,7 @@ public class RocketController : MonoBehaviour
         {
             source.volume = Mathf.Lerp(startVol, targetVol, t);
 
-            t += this.volumeFadeSpeed;
+            t += this.thrustVolumeLerp;
 
             yield return false;
         }

@@ -894,13 +894,15 @@ MonoBehaviour:
   liftMultiplier: 3300
   rotationMultiplier: 75
   gravityAcceleration: -150
-  volumeFadeSpeed: 0.03
+  thrustVolumeLerp: 0.03
   thrustAudioSource: {fileID: 2058574943}
   deathAudioSource: {fileID: 1707890997}
   finishAudioSource: {fileID: 1076812498}
   levelChanger: {fileID: 0}
-  finishDelay: 2
+  finishDelay: 3
   deathDelay: 2
+  deathExplosionBaseForce: 3000
+  minVelocityMultiplier: 0.5
 --- !u!54 &1423750568
 Rigidbody:
   m_ObjectHideFlags: 0
