@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 public class LevelChanger : MonoBehaviour
 {
     [SerializeField]
-    private string nextLevel;
+    [Tooltip("Name of the next scene that will be loaded when a fade out completes.")]
+    private string nextLevelName;
 
     private Animator animator;
     private string levelOverride;
@@ -50,7 +51,7 @@ public class LevelChanger : MonoBehaviour
 
         if(string.IsNullOrEmpty(this.levelOverride))
         {
-            SceneManager.LoadScene(nextLevel);
+            SceneManager.LoadScene(nextLevelName);
         }
         else
         {
