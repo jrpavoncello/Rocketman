@@ -3,7 +3,7 @@
 public class RocketFollower : MonoBehaviour
 {
     [SerializeField]
-    private Vector3 cameraOffset = new Vector3(0, .5f, 0);
+    private Vector3 cameraOffset = new Vector3(0, .5f, 5.156f);
 
     [SerializeField]
     private RocketController rocket;
@@ -40,11 +40,7 @@ public class RocketFollower : MonoBehaviour
 
     private void SetCameraPosition()
     {
-        var targetPosition = this.transform.position;
-
-        targetPosition.x = this.rocket.transform.position.x;
-        targetPosition.y = this.rocket.transform.position.y;
-        // Maintain camera's z position (distance from rocket)
+        var targetPosition = this.rocket.transform.position;
 
         targetPosition += cameraOffset;
 
