@@ -37,6 +37,18 @@ public class RocketController : MonoBehaviour
     private AudioSource finishAudioSource;
 
     [SerializeField]
+    [Tooltip("Particles emitted when the player is applying thrust.")]
+    private ParticleSystem thrustParticles;
+
+    [SerializeField]
+    [Tooltip("Particles emitted when the player collides with an obstacle or lands inappropriately on the landing pad.")]
+    private ParticleSystem deathParticles;
+
+    [SerializeField]
+    [Tooltip("Particles emitted when the player begins a landing on the landing pad.")]
+    private ParticleSystem finishParticles;
+
+    [SerializeField]
     [Tooltip("Responsible for fading in/out and changing levels.")]
     private LevelChanger levelChanger;
 
@@ -114,10 +126,14 @@ public class RocketController : MonoBehaviour
             HandleRocketThrust(verticalInput);
 
             HandleThrustAudio(true);
+
+            this.thrustParticles.Play();
         }
         else
         {
             HandleThrustAudio(false);
+
+            this.thrustParticles.Stop();
         }
 
         // Allow rocket rotation to happen
@@ -233,6 +249,8 @@ public class RocketController : MonoBehaviour
 
             this.finishAudioSource.Play();
 
+            this.finishParticles.Play();
+
             Invoke(nameof(CheckRocketPostDelay), this.finishDelay);
         }
     }
@@ -275,6 +293,9 @@ public class RocketController : MonoBehaviour
         StopThrustSounds();
 
         this.deathAudioSource.Play();
+        this.deathParticles.Play();
+        // Gives a cool smoking effect
+        this.thrustParticles.Play();
 
         Invoke(nameof(ReloadLevelPostDelay), this.deathDelay);
     }

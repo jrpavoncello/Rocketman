@@ -1347,14 +1347,6 @@ PrefabInstance:
       propertyPath: levelChanger
       value: 
       objectReference: {fileID: 946285349}
-    - target: {fileID: 1423750566, guid: 747c6abd77f7a954ca8be0a8b55730f4, type: 3}
-      propertyPath: minVelocityMultiplier
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1423750566, guid: 747c6abd77f7a954ca8be0a8b55730f4, type: 3}
-      propertyPath: deathExplosionBaseForce
-      value: 3000
-      objectReference: {fileID: 0}
     - target: {fileID: 7542352646568475099, guid: 747c6abd77f7a954ca8be0a8b55730f4,
         type: 3}
       propertyPath: m_LocalPosition.x
