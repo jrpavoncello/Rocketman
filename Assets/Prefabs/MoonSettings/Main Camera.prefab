@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 31765854}
   - component: {fileID: 31765853}
   - component: {fileID: 31765852}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -112,7 +112,7 @@ GameObject:
   - component: {fileID: 946285347}
   - component: {fileID: 946285346}
   - component: {fileID: 2778237219062719973}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: LevelChanger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -206,7 +206,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 312ef5d40bf86ea4baf1a7434b13d5d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nextLevelName: Level02
 --- !u!1 &278798146720977292
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +258,8 @@ MonoBehaviour:
   rocket: {fileID: 0}
   velocityMultiplier: {x: 0.1, y: 0.2}
   flightLerpRate: 0.7
-  rocketCollisionLerpRate: 0.3
+  collisionLerpRate: 0.3
+  explosionLerpRate: 0.03
 --- !u!20 &278798146720977295
 Camera:
   m_ObjectHideFlags: 0
