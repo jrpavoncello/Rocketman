@@ -894,8 +894,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5d21bff6ebe54f4bb6ca770ddc47634, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  liftMultiplier: 3300
-  rotationMultiplier: 80
+  liftMultiplier: 3400
+  rotationMultiplier: 90
   gravityAcceleration: -150
   thrustVolumeLerp: 0.03
   thrustAudioSource: {fileID: 2058574943}
