@@ -30,14 +30,16 @@ public class LevelChanger : MonoBehaviour
     public void BeginNextLevel()
     {
         animator.SetTrigger(FADEOUT);
-
     }
 
     public void ReloadLevel(Action callback)
     {
         animator.SetTrigger(FADEOUT);
 
-        this.levelOverride = SceneManager.GetActiveScene().name;
+        var activeScene = SceneManager.GetActiveScene();
+
+        this.levelOverride = activeScene.name;
+
         this.callback = callback;
     }
 
@@ -51,7 +53,10 @@ public class LevelChanger : MonoBehaviour
 
         if(string.IsNullOrEmpty(this.levelOverride))
         {
-            SceneManager.LoadScene(nextLevelName);
+            var activeScene = SceneManager.GetActiveScene();
+            var currentBuildIndex = activeScene.buildIndex;
+            var nextBuildIndex = (currentBuildIndex + 1) % SceneManager.sceneCountInBuildSettings;
+            SceneManager.LoadScene(nextBuildIndex);
         }
         else
         {
