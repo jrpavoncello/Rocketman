@@ -69,8 +69,13 @@ public class RocketController : MonoBehaviour
     private float deathExplosionBaseForce = 3000f;
 
     [SerializeField]
-    [Tooltip("When the velocity is factored in, it will be minimally clamped to this value so that we don't cause NaN.")]
-    private float minVelocityMultiplier = 0.2f;
+    [Tooltip("Will be multiplied to the force added from velocity for the death explosion.")]
+    private float explosionVelocityMultiplier = .5f;
+
+    [SerializeField]
+    [Tooltip("When the death explosion velocity is factored in, it will be maxed with this value so that slow brushes with " +
+        "walls still cause a bit of a boom.")]
+    private float minExplosionForceMultiplier = 0.5f;
 
     public RocketState State { get; private set; } = RocketState.Alive;
 
@@ -284,8 +289,8 @@ public class RocketController : MonoBehaviour
         if(!explosionPosition.IsInfinityOrNaN())
         {
             // Protect against really low rocket velocity when collision occurs
-            var velocityMultiplier = Mathf.Max(rigidBody.velocity.magnitude, minVelocityMultiplier);
-            var explosionForce = this.deathExplosionBaseForce * velocityMultiplier;
+            var velocityMultiplier = Mathf.Max(rigidBody.velocity.magnitude, minExplosionForceMultiplier);
+            var explosionForce = this.deathExplosionBaseForce + (velocityMultiplier * explosionVelocityMultiplier);
 
             rigidBody.AddExplosionForce(explosionForce, explosionPosition, 0f, 0f, ForceMode.Force);
         }
